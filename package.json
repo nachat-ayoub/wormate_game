@@ -1,0 +1,13 @@
+{
+  "name": "2d-test-game",
+  "version": "1.0.0",
+  "source": "src/index.html",
+  "license": "MIT",
+  "scripts": {
+    "dev": "parcel",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "parcel": "^2.8.3"
+  }
+}
