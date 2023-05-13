@@ -18,7 +18,6 @@ body {
 
 #canvas {
   border: none;
-  background-image: url("./assets/background2.png");
   background-size: contain;
   width: 1280px;
   height: 720px;
