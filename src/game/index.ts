@@ -1,28 +1,39 @@
-import InputHandler from './InputHandler';
 import Player from './Player';
+import { GameObject } from './utils';
 
 export default class Game {
   width: number;
   height: number;
-  lastKey: string;
-  inputHandler: InputHandler;
+  DEBUG = true;
+
+  map = {
+    width: 3000,
+    height: 3000,
+  };
+
   player: Player;
+  object: GameObject;
 
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
 
     this.player = new Player(this);
+    this.object = new GameObject(this);
   }
 
   render(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, this.width, this.height);
 
-    //! Draw somthing
-    ctx.fillStyle = 'darkgreen';
-    ctx.fillRect(270, 300, 100, 100);
+    // draw game objects here
+    // Object :
+    this.object.draw(ctx);
+    this.object.update();
 
+    // Player :
     this.player.draw(ctx);
     this.player.update();
+
+    ctx.restore();
   }
 }
