@@ -30,7 +30,7 @@ export default class Player extends Base2dObject {
     // Rotate the canvas based on the player angle
     ctx.rotate(this.angle);
 
-    // Draw the player image
+    // Draw the player image :
     ctx.drawImage(
       this.image,
       -this.radius,
