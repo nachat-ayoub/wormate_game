@@ -1,1 +1,1 @@
-# Vanilla js 2d game boilerplate.# wormate_game
+# 2d Wormate.io Game With Vanilla js.

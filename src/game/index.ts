@@ -1,5 +1,5 @@
-import InputHandler from "./InputHandler";
-import Player from "./Player";
+import InputHandler from './InputHandler';
+import Player from './Player';
 
 export default class Game {
   width: number;
@@ -12,14 +12,15 @@ export default class Game {
     this.width = width;
     this.height = height;
 
-    this.lastKey = "";
-    this.inputHandler = new InputHandler(this);
-
     this.player = new Player(this);
   }
 
   render(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, this.width, this.height);
+
+    //! Draw somthing
+    ctx.fillStyle = 'darkgreen';
+    ctx.fillRect(270, 300, 100, 100);
 
     this.player.draw(ctx);
     this.player.update();
