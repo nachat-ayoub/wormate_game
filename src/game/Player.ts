@@ -10,18 +10,26 @@ export default class Player extends Base2dObject {
   canvasWidth: number;
   canvasHeight: number;
   game: Game;
-  speed: 10;
+  minSpeed = 4;
+  maxSpeed = 10;
+  speed = 4;
+  vx = 0;
+  vy = 0;
+  zoomInterval = 0;
+  targetZoom = 0;
+  deltaTime = 0;
 
-  constructor(game: Game, x: number = 400, y: number = 400) {
+  constructor(game: Game) {
     super();
 
     this.game = game;
     this.image = document.querySelector('img#wormface') as HTMLImageElement;
     this.canvasWidth = game.width;
     this.canvasHeight = game.height;
+    this.width = this.height = this.radius * 2;
 
-    this.x = game.width / 2 - this.radius; //x;
-    this.y = game.height / 2 - this.radius; //y;
+    this.x = game.width / 2 - this.radius;
+    this.y = game.height / 2 - this.radius;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -29,7 +37,10 @@ export default class Player extends Base2dObject {
     ctx.save();
 
     // Translate to the center of the player image
-    ctx.translate(this.x + this.radius, this.y + this.radius);
+    ctx.translate(
+      this.x + this.radius * this.game.map.zoom,
+      this.y + this.radius * this.game.map.zoom
+    );
 
     // Rotate the canvas based on the player angle
     ctx.rotate(this.angle);
@@ -37,46 +48,56 @@ export default class Player extends Base2dObject {
     // Draw the player image
     ctx.drawImage(
       this.image,
-      -this.radius,
-      -this.radius,
-      this.radius * 2,
-      this.radius * 2
+      -this.radius * this.game.map.zoom,
+      -this.radius * this.game.map.zoom,
+      this.width * this.game.map.zoom,
+      this.height * this.game.map.zoom
     );
 
     // Restore the canvas state
     ctx.restore();
   }
 
-  update() {
+  update(deltaTime?: number) {
+    if (deltaTime) {
+      this.deltaTime = deltaTime;
+    }
+
     // Update the player
     const dx = this.x - window.mouse.x + this.radius;
     const dy = this.y - window.mouse.y + this.radius;
-
     this.angle = Math.atan2(dy, dx);
 
     // * Move the player
-    this.move(dx, dy);
-
-    // if (window.mouse.x !== this.x) {
-    //   this.x -= dx / 30;
-    // }
-    // if (window.mouse.y !== this.y) {
-    //   this.y -= dy / 30;
-    // }
+    this.move();
   }
 
-  move(dx: number, dy: number) {
-    // Move the player
-    // this.x -= dx / 20;
-    // this.y -= dy / 20;
+  move() {
+    const currentZoom = this.game.map.zoom;
+    const zoomMultiplier = currentZoom / 1.5; // Divide by the default zoom level
 
-    // Update the map position
-    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-    const visibleWidth = canvas.width / this.game.map.zoom;
-    const visibleHeight = canvas.height / this.game.map.zoom;
-    // this.game.map.x = this.x - visibleWidth / 2;
-    // this.game.map.y = this.y - visibleHeight / 2;
-    this.game.map.x -= dx / 10;
-    this.game.map.y -= dy / 10;
+    if (window.mouse.clicked) {
+      this.speed = this.maxSpeed * zoomMultiplier;
+      this.zoomTo(1.5);
+    } else {
+      this.speed = this.minSpeed * zoomMultiplier;
+      this.zoomTo(1);
+    }
+
+    this.vx = this.speed * Math.cos(this.angle);
+    this.vy = this.speed * Math.sin(this.angle);
+
+    this.game.map.x -= this.vx;
+    this.game.map.y -= this.vy;
   }
+
+  zoomTo(targetZoom: number, duration: number = 200) {
+    if (!this.deltaTime) return false;
+
+    const zoomIncrement =
+      (targetZoom - this.game.map.zoom) * (this.deltaTime / duration);
+    this.game.map.zoom += zoomIncrement;
+  }
+
+  //
 }
