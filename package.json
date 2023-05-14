@@ -4,10 +4,13 @@
   "source": "src/index.html",
   "license": "MIT",
   "scripts": {
-    "dev": "parcel --port 3000",
+    "dev": "rm -rf ./dist && rm -rf ./.parcel-cache/ && parcel --port 3000",
     "build": "parcel build"
   },
   "devDependencies": {
     "parcel": "^2.8.3"
-  }
+  },
+  "assets": [
+    "assets/**/*"
+  ]
 }

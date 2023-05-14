@@ -19,10 +19,6 @@ body {
 
 #canvas {
   border: none;
-  background-image: url('./assets/bg.png');
-  background-repeat: repeat;
-  background-size: 600px;
-  /* width: 100vw;
-  height: 100vh; */
-  overflow: hidden;
+  background-size: 500px;
+  /* overflow: hidden; */
 }

@@ -3,18 +3,8 @@ import Game from './game';
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
+window.canvas = canvas;
 const canvasPosition = canvas.getBoundingClientRect();
-
-declare global {
-  interface Window {
-    mouse: {
-      x: number;
-      y: number;
-      clicked: boolean;
-    };
-  }
-}
 
 window.mouse = {
   x: window.innerWidth / 2,
@@ -32,11 +22,11 @@ window.addEventListener('load', () => {
   canvas.addEventListener('mouseup', (e) => (window.mouse.clicked = false));
 
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
-
   const game = new Game(canvas.width, canvas.height);
 
   function animate(deltaTime: number) {
     game.render(context);
+
     requestAnimationFrame(animate);
   }
 
