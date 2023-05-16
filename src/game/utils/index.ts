@@ -36,23 +36,34 @@ export class Base2dObject {
   }
 }
 
-export class GameObject2 extends Base2dObject {
+export class Food extends Base2dObject {
+  points = 10;
   color: string;
+  image: HTMLImageElement;
+  canvasX = 0;
+  canvasY = 0;
+  canvasWidth = 0;
+  canvasHeight = 0;
+
+  maxSpawningTime: number; // * in seconds
+  shouldBeRemoved = false;
+  spawned: Date;
 
   constructor(
     game: Game,
-    x: number = randInt(630, 1400),
-    y: number = randInt(800, 1200),
-    size: number = randInt(100, 300),
-    color: string = ['red', 'darkgreen', 'orange', 'lime'][randInt(0, 3)]
+    image: string = '#glowingCake',
+    x: number = randInt(game.margin, game.map.width - game.margin),
+    y: number = randInt(game.margin, game.map.height - game.margin)
   ) {
     super();
 
+    this.maxSpawningTime = randInt(10, 15); // * in seconds
+    this.spawned = new Date();
+    this.image = document.querySelector(image) as HTMLImageElement;
+    this.width = this.height = 100;
+    this.game = game;
     this.x = x;
     this.y = y;
-    this.width = this.height = size;
-    this.color = color;
-    this.game = game;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -60,23 +71,66 @@ export class GameObject2 extends Base2dObject {
       return;
     }
 
-    const canvasX = (this.x - this.game.map.x) * this.game.map.zoom;
-    const canvasY = (this.y - this.game.map.y) * this.game.map.zoom;
+    this.canvasX = (this.x - this.game.map.x) * this.game.map.zoom;
+    this.canvasY = (this.y - this.game.map.y) * this.game.map.zoom;
 
-    const canvasWidth = this.width * this.game.map.zoom;
-    const canvasHeight = this.height * this.game.map.zoom;
+    this.canvasWidth = this.width * this.game.map.zoom;
+    this.canvasHeight = this.height * this.game.map.zoom;
 
-    ctx.fillStyle = this.color;
-    ctx.fillRect(canvasX, canvasY, canvasWidth, canvasHeight);
+    ctx.drawImage(
+      this.image,
+      this.canvasX,
+      this.canvasY,
+      this.canvasWidth,
+      this.canvasHeight
+    );
   }
 
-  update() {}
+  update() {
+    if (this.isCollidingWithPlayer()) {
+      this.game.player.addPoints(this.points);
+      this.removeFood();
+    } else if (this.foodExpired()) {
+      this.removeFood();
+    }
+  }
+
+  foodExpired() {
+    return dateDiff(this.spawned, new Date()) > this.maxSpawningTime;
+  }
+
+  removeFood() {
+    this.shouldBeRemoved = true;
+  }
+
+  isCollidingWithPlayer() {
+    // * Object Boundaries :
+    const top = this.canvasY;
+    const left = this.canvasX;
+    const right = this.canvasX + this.canvasWidth;
+    const bottom = this.canvasY + this.canvasHeight;
+
+    // * Player Boundaries :
+    const playerTop = this.game.height / 2 - this.game.player.height / 2;
+    const playerLeft = this.game.width / 2 - this.game.player.width / 2;
+    const playerRight = this.game.width / 2 + this.game.player.width / 2;
+    const playerBottom = this.game.height / 2 + this.game.player.height / 2;
+
+    // Check for collision
+    return (
+      right >= playerLeft &&
+      left <= playerRight &&
+      bottom >= playerTop &&
+      top <= playerBottom
+    );
+  }
 }
 
 //
 //
 //
 //
+
 //
 //
 //
@@ -121,4 +175,19 @@ export class GameObject extends Base2dObject {
     ctx.fillStyle = 'darkgreen';
     ctx.fillRect(270, 300, 100, 100);
   }
+}
+
+//
+//
+//
+//
+//
+
+export function dateDiff(startDate: Date, endDate: Date) {
+  const differenceInMilliseconds = startDate.getTime() - endDate.getTime();
+  const differenceInSeconds = Math.abs(
+    Math.floor(differenceInMilliseconds / 1000)
+  );
+
+  return differenceInSeconds;
 }

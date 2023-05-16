@@ -1,5 +1,5 @@
 import Player from './Player';
-import { GameObject, GameObject2 } from './utils';
+import { GameObject, Food, randInt } from './utils';
 
 declare global {
   interface Window {
@@ -16,7 +16,7 @@ export default class Game {
   width: number;
   height: number;
   DEBUG = true;
-
+  margin = 400;
   map = {
     width: 2692,
     height: 1954,
@@ -28,17 +28,42 @@ export default class Game {
   };
 
   player: Player;
-  object: GameObject;
+  foodObjects: Food[];
+  foodTimer = 0;
 
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
 
     this.player = new Player(this);
-    this.object = new GameObject2(this);
+    this.foodObjects = [new Food(this)];
   }
 
-  render(ctx: CanvasRenderingContext2D, deltaTime?: number) {
+  spawnFood() {
+    for (let i = 0; i < randInt(5, 10); i++) {
+      setTimeout(() => {
+        this.foodObjects.push(new Food(this));
+      }, randInt(0, 6) * 1000);
+    }
+  }
+
+  foodSpawnTimer(deltaTime: number, cb: () => void, interval: number = 6) {
+    // Update the timer
+    this.foodTimer += deltaTime;
+
+    // Check if 6 seconds have elapsed
+    if (this.foodTimer >= interval * 1000) {
+      // 6000 milliseconds = 6 seconds
+
+      // Perform the action
+      cb();
+
+      // Reset the timer
+      this.foodTimer = 0;
+    }
+  }
+
+  render(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.clearRect(0, 0, window.canvas.width, window.canvas.height);
 
     // Calculate the visible width and height of the map based on the current zoom level and canvas size
@@ -70,9 +95,17 @@ export default class Game {
       window.innerHeight
     );
 
+    this.foodSpawnTimer(deltaTime, () => this.spawnFood(), randInt(6, 10));
+
     // Draw an object
-    this.object.draw(ctx);
-    this.object.update(deltaTime);
+    for (const object of this.foodObjects) {
+      if (object.shouldBeRemoved) {
+        this.foodObjects.splice(this.foodObjects.indexOf(object), 1);
+      } else {
+        object.draw(ctx);
+        object.update();
+      }
+    }
 
     // Draw the player
     this.player.draw(ctx);

@@ -22,3 +22,15 @@ body {
   background-size: 500px;
   /* overflow: hidden; */
 }
+
+#scorePoints {
+  position: absolute;
+  text-align: right;
+  top: 20px;
+  right: 20px;
+  font-size: 3rem;
+  font-weight: bold;
+  font-family: sans-serif;
+  color: white;
+  user-select: none;
+}

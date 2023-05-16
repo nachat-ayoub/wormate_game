@@ -2,9 +2,10 @@ import Game from '.';
 import { Base2dObject } from './utils';
 
 export default class Player extends Base2dObject {
+  points = 0;
   x = 250;
   y = 250;
-  radius = 50;
+  radius = 30;
   image: HTMLImageElement;
   angle = 0;
   canvasWidth: number;
@@ -74,11 +75,11 @@ export default class Player extends Base2dObject {
 
   move() {
     const currentZoom = this.game.map.zoom;
-    const zoomMultiplier = currentZoom / 1.5; // Divide by the default zoom level
+    const zoomMultiplier = currentZoom / 1;
 
     if (window.mouse.clicked) {
       this.speed = this.maxSpeed * zoomMultiplier;
-      this.zoomTo(1.5);
+      this.zoomTo(1.2);
     } else {
       this.speed = this.minSpeed * zoomMultiplier;
       this.zoomTo(1);
@@ -99,5 +100,17 @@ export default class Player extends Base2dObject {
     this.game.map.zoom += zoomIncrement;
   }
 
-  //
+  // * update points :
+  addPoints(points: number) {
+    this.points += points;
+    const scoreElm = document.querySelector(
+      '#scorePoints span'
+    ) as HTMLSpanElement;
+
+    scoreElm.textContent = this.points.toString();
+  }
+
+  resetPoints() {
+    this.points = 0;
+  }
 }
