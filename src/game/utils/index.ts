@@ -1,4 +1,5 @@
 import Game from '..';
+import { ISprite } from './types';
 
 export const GAME_CONTROLS = {
   ARROW_UP: 'ArrowUp',
@@ -19,7 +20,7 @@ export class Base2dObject {
   game: Game;
   deltaTime: number;
 
-  draw(ctx: CanvasRenderingContext2D) {}
+  draw(ctx: CanvasRenderingContext2D, deltaTime?: number) {}
   update(deltaTime?: number) {
     if (deltaTime) {
       this.deltaTime = deltaTime;
@@ -37,8 +38,8 @@ export class Base2dObject {
 }
 
 export class Food extends Base2dObject {
+  sprite: ISprite;
   points = 10;
-  color: string;
   image: HTMLImageElement;
   canvasX = 0;
   canvasY = 0;
@@ -51,7 +52,7 @@ export class Food extends Base2dObject {
 
   constructor(
     game: Game,
-    image: string = '#glowingCake',
+    image: string = ['pizza', 'cake', 'coin'][randInt(0, 2)],
     x: number = randInt(game.margin, game.map.width - game.margin),
     y: number = randInt(game.margin, game.map.height - game.margin)
   ) {
@@ -59,14 +60,22 @@ export class Food extends Base2dObject {
 
     this.maxSpawningTime = randInt(10, 15); // * in seconds
     this.spawned = new Date();
-    this.image = document.querySelector(image) as HTMLImageElement;
+    this.image = document.querySelector(`#${image}-sprite`) as HTMLImageElement;
     this.width = this.height = 100;
     this.game = game;
     this.x = x;
     this.y = y;
+
+    this.sprite = createSprite({
+      width: 150,
+      height: 150,
+      image: this.image,
+      maxFrames: 7,
+      fps: 15,
+    });
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, deltaTime: number) {
     if (!this.isVisible()) {
       return;
     }
@@ -78,12 +87,18 @@ export class Food extends Base2dObject {
     this.canvasHeight = this.height * this.game.map.zoom;
 
     ctx.drawImage(
-      this.image,
+      this.sprite.image,
+      this.sprite.frameX * this.sprite.width,
+      this.sprite.frameY * this.sprite.height,
+      this.sprite.width,
+      this.sprite.height,
       this.canvasX,
       this.canvasY,
       this.canvasWidth,
       this.canvasHeight
     );
+
+    this.sprite.animate(deltaTime);
   }
 
   update() {
@@ -131,50 +146,28 @@ export class Food extends Base2dObject {
 //
 //
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
+export function createSprite(
+  sprite: Omit<
+    ISprite,
+    'animate' | 'frameX' | 'frameY' | 'frameInterval' | 'frameTimer'
+  >
+): ISprite {
+  return {
+    ...sprite,
+    frameX: 0,
+    frameY: 0,
+    frameInterval: 1000 / sprite.fps,
+    frameTimer: 0,
+    animate(deltaTime: number) {
+      if (this.frameTimer > this.frameInterval) {
+        if (this.frameX < this.maxFrames) {
+          this.frameX++;
+        } else this.frameX = 0;
 
-export class GameObject extends Base2dObject {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  game: Game;
-
-  constructor(
-    game: Game,
-    {
-      x = 300,
-      y = 300,
-      width = 100,
-      height = 300,
-    }: { x?: number; y?: number; width?: number; height?: number } = {
-      x: 300,
-      y: 300,
-      width: 100,
-      height: 300,
-    }
-  ) {
-    super();
-
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.game = game;
-  }
-
-  draw(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = 'darkgreen';
-    ctx.fillRect(270, 300, 100, 100);
-  }
+        this.frameTimer = 0;
+      } else this.frameTimer += deltaTime;
+    },
+  };
 }
 
 //

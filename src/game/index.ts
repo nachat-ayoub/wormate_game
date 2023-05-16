@@ -30,6 +30,7 @@ export default class Game {
   player: Player;
   foodObjects: Food[];
   foodTimer = 0;
+  maxFoodInMap = 20;
 
   constructor(width: number, height: number) {
     this.width = width;
@@ -41,9 +42,12 @@ export default class Game {
 
   spawnFood() {
     for (let i = 0; i < randInt(5, 10); i++) {
-      setTimeout(() => {
-        this.foodObjects.push(new Food(this));
-      }, randInt(0, 6) * 1000);
+      if (this.foodObjects.length === this.maxFoodInMap) break;
+      else {
+        setTimeout(() => {
+          this.foodObjects.push(new Food(this));
+        }, randInt(0, 6) * 1000);
+      }
     }
   }
 
@@ -54,7 +58,6 @@ export default class Game {
     // Check if 6 seconds have elapsed
     if (this.foodTimer >= interval * 1000) {
       // 6000 milliseconds = 6 seconds
-
       // Perform the action
       cb();
 
@@ -64,6 +67,7 @@ export default class Game {
   }
 
   render(ctx: CanvasRenderingContext2D, deltaTime: number) {
+    console.log(this.foodObjects);
     ctx.clearRect(0, 0, window.canvas.width, window.canvas.height);
 
     // Calculate the visible width and height of the map based on the current zoom level and canvas size
@@ -102,7 +106,7 @@ export default class Game {
       if (object.shouldBeRemoved) {
         this.foodObjects.splice(this.foodObjects.indexOf(object), 1);
       } else {
-        object.draw(ctx);
+        object.draw(ctx, deltaTime);
         object.update();
       }
     }
