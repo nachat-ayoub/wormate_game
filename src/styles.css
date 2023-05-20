@@ -18,8 +18,9 @@ body {
 }
 
 #canvas {
-  border: none;
   background-size: 500px;
+  border: black 2px solid;
+  /* border: none; */
   /* overflow: hidden; */
 }
 
